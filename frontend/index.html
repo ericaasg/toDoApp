@@ -1,0 +1,85 @@
+<h1>my toDo-List</h1>
+<div id="container"></div>
+<br>
+<hr>
+<form>
+    <input type="text" id="todoValue" placeholder="todo name"/>
+    <button type="button" id="addTodoButton">Add todo</button>
+</form>
+
+<br>
+<hr>
+<button type="button" id="deleteTodoButton">Delete Last Todo</button>
+
+<script>
+    <!--  everything here will get automatically executed at page load  -->
+
+    async function getData() {
+        const url = "http://localhost:8080/todos";
+        const response = await fetch(url);
+        const json = await response.json();
+        return json;
+    }
+
+    function reloadTodos(){
+        getData().then(todos => {
+            document.getElementById("container").innerHTML=""
+            for(const todo of todos) {
+                const paragraph = document.createElement("li");
+                paragraph.appendChild(document.createTextNode(todo));
+                document.getElementById("container").appendChild(paragraph)
+            }
+        })
+    }
+
+    async function addTodo() {
+         const todoName = document.getElementById("todoValue").value
+         const data = {
+            value: todoName
+         };
+         fetch('http://localhost:8080/todos', {
+            method: 'POST', // Specify the HTTP method
+            headers: {
+                'Content-Type': 'application/json', // Set content type to JSON
+            },
+            body: JSON.stringify(data) // Convert JavaScript object to JSON string
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('ToDo item added successfully');
+            } else {
+                console.log('Failed to add ToDo item');
+            }
+        })
+    }
+
+    async function deleteTodo() {
+         fetch('http://localhost:8080/todos', {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('ToDo item added successfully');
+            } else {
+                console.log('Failed to add ToDo item');
+            }
+        })
+    }
+
+    <!--    PROGRAM START -->
+    reloadTodos()
+
+    document.getElementById("addTodoButton")
+        .addEventListener("click", () => {
+            addTodo()
+            document.getElementById("todoValue").value=""
+            setTimeout(() => reloadTodos(), 200)
+        })
+
+    document.getElementById("deleteTodoButton")
+        .addEventListener("click", () => {
+            deleteTodo()
+            setTimeout(() => reloadTodos(), 200)
+        })
+
+</script>
